@@ -12,7 +12,7 @@
     (django_env)~/django_env $ pip install django
     (django_env)~/django_env $ mkdir src
     (django_env)~/django_env $ cd src
-    (django_env)~/django_env/src $ django-admin startproject timing-attack
+    (django_env)~/django_env/src $ django-admin startproject timingattack
     (django_env)~/django_env/src $ cd timingattack/timingattack/
     (django_env)~/django_env/src/timingattack/timingattack $ touch tests.py # <<<-- put this content there ;)
     (django_env)~/django_env/src/timingattack/timingattack $ cd ..
