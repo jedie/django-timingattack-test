@@ -5,11 +5,12 @@
     ~~~~~~~~~~~~~~~~~~
 
     HowTo:
-    
+
     ~ $ virtualenv django_env
     ~ $ cd django_env/
     ~/django_env $ source bin/activate
-    (django_env)~/django_env $ pip install django
+    (django_env)~/django_env $ pip install --upgrade pip
+    (django_env)~/django_env $ pip install django matplotlib
     (django_env)~/django_env $ mkdir src
     (django_env)~/django_env $ cd src
     (django_env)~/django_env/src $ django-admin startproject timingattack
@@ -18,17 +19,6 @@
     (django_env)~/django_env/src/timingattack/timingattack $ cd ..
     (django_env)~/django_env/src/timingattack $ ./manage.py test
     Creating test database for alias 'default'...
-    
-    Measuring successful django login (200 loops)...
-    	Min/max avg with 30 items.
-    	avg.min: 45.7ms (-6%) - average: 48.8ms - avg.max: 54.5ms (10%) (takes 10.11 sec.)
-    Measuring 'wrong password' django login (200 loops)...
-    	Min/max avg with 30 items.
-    	avg.min: 49.0ms (-6%) - average: 52.1ms - avg.max: 57.0ms (8%) (takes 10.52 sec.)
-    Measuring 'wrong username' django login (200 loops)...
-    	Min/max avg with 30 items.
-    	avg.min: 48.5ms (-6%) - average: 51.6ms - avg.max: 58.0ms (11%) (takes 10.42 sec.)
-     *** max.average django diff: 3.33ms (6.4%)
     .
     ----------------------------------------------------------------------
     Ran 1 test in 31.100s
@@ -47,24 +37,22 @@ import sys
 from django.contrib.auth import SESSION_KEY, get_user_model
 from django.core.urlresolvers import reverse
 from django.test import override_settings, SimpleTestCase
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+
 
 
 # MEASUREING_LOOPS = 10
 # MEASUREING_LOOPS = 25
 # MEASUREING_LOOPS = 50
 # MEASUREING_LOOPS = 75
-MEASUREING_LOOPS = 200
+# MEASUREING_LOOPS = 200
+MEASUREING_LOOPS = 300
 
-MIN_MAX_AVG_PERCENT = 15
-
-
-def average(l):
-    try:
-        return sum(l) / len(l)
-    except ZeroDivisionError:
-        return 0
+PDF_FILENAME = 'DjangoTimingAttackMatplot.pdf'
 
 
+# @override_settings(PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher',))
 class BaseTestCase(SimpleTestCase):
     SUPER_USER_NAME = "super"
     SUPER_USER_PASS = "super secret"
@@ -80,7 +68,7 @@ class BaseTestCase(SimpleTestCase):
         self.superuser, created = get_user_model().objects.get_or_create(
             username=self.SUPER_USER_NAME
         )
-        self.superuser.email='unittest@localhost'
+        self.superuser.email = 'unittest@localhost'
         self.superuser.is_active = True
         self.superuser.is_staff = True
         self.superuser.is_superuser = True
@@ -91,35 +79,7 @@ class BaseTestCase(SimpleTestCase):
         print(*args, file=sys.stderr)
 
 
-class BaseTestTimingAttack(BaseTestCase):
-    VERBOSE = False
-
-    def _measure_loop(self, callback):
-        start_time = time.time()
-        durations = [callback() for _ in range(MEASUREING_LOOPS)]
-        duration = time.time() - start_time
-
-        durations.sort()
-        avg = average(durations)
-        count = int(round(MEASUREING_LOOPS/100*MIN_MAX_AVG_PERCENT,0))
-        if count<1:
-            count=1
-        self.out("\tMin/max avg with %i items." % count)
-        avg_min = average(durations[:count])
-        avg_max = average(durations[-count:])
-
-        quick_percent = 100 - (100/avg_min*avg)
-        long_percent = 100 - (100/avg_max*avg)
-        self.out("\tavg.min: %.1fms (%i%%) - average: %.1fms - avg.max: %.1fms (%i%%) (takes %.2f sec.)" % (
-            avg_min*1000, quick_percent,
-            avg*1000,
-            avg_max*1000, long_percent,
-            duration
-        ))
-        return avg
-
-
-class TestDjangoLoginTimingAttack(BaseTestTimingAttack):
+class TestDjangoLoginTimingAttack(BaseTestCase):
     def measured_successful_django_login(self):
         start_time = time.time()
         self.client.post(
@@ -165,19 +125,52 @@ class TestDjangoLoginTimingAttack(BaseTestTimingAttack):
 
     @override_settings(DEBUG=False)
     def test_django_login(self):
-        self.out("\nMeasuring successful django login (%i loops)..." % MEASUREING_LOOPS)
-        average1 = self._measure_loop(self.measured_successful_django_login)
+        durations1 = []
+        durations2 = []
+        durations3 = []
 
-        self.out("Measuring 'wrong password' django login (%i loops)..." % MEASUREING_LOOPS)
-        average2 = self._measure_loop(self.measured_wrong_password_django_login)
+        # MEASUREING_LOOPS = 20
 
-        self.out("Measuring 'wrong username' django login (%i loops)..." % MEASUREING_LOOPS)
-        average3 = self._measure_loop(self.measured_wrong_username_django_login)
+        next_update = time.time() + 1
+        for i in range(MEASUREING_LOOPS):
+            start_time = time.time()
+            self.measured_successful_django_login()
+            durations1.append(time.time() - start_time)
 
-        averages = [average1, average2, average3]
-        min_avg = min(averages)
-        max_avg = max(averages)
+            start_time = time.time()
+            self.measured_wrong_password_django_login()
+            durations2.append(time.time() - start_time)
 
-        diff = max_avg - min_avg
-        percent = 100 - (100/max_avg*min_avg)
-        self.out(" *** max.average django diff: %.2fms (%.1f%%)" % (diff*1000, percent))
+            start_time = time.time()
+            self.measured_wrong_username_django_login()
+            durations3.append(time.time() - start_time)
+            if time.time() > next_update:
+                self.out("%i/%i loops." % (i, MEASUREING_LOOPS))
+                next_update = time.time() + 1
+
+        # self.out(durations1)
+        # self.out(durations2)
+        # self.out(durations3)
+
+        total_durations = durations1 + durations2 + durations3
+        fastest = min(total_durations)
+        slowest = max(total_durations)
+        # print(fastest, slowest)
+
+        with PdfPages(PDF_FILENAME) as pdf:
+            # http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot
+            plt.plot(range(MEASUREING_LOOPS), durations1, 'go', label="success")
+            plt.plot(range(MEASUREING_LOOPS), durations2, 'ro', label="wrong password")
+            plt.plot(range(MEASUREING_LOOPS), durations3, 'yo', label="wrong username")
+            plt.axis([0, MEASUREING_LOOPS, fastest, slowest])
+            plt.ylabel('response time')
+            plt.xlabel('loop count')
+            plt.legend(shadow=True, title="Legend", fancybox=True)
+
+            plt.title('Django Timing Attack Matplot')
+            pdf.savefig()
+            plt.close()
+
+        self.out("%r written!" % PDF_FILENAME)
+
+
