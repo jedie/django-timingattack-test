@@ -4,19 +4,34 @@
     Timing Attack DEMO
     ~~~~~~~~~~~~~~~~~~
 
-
-    Example run:
-
+    HowTo:
+    
+    ~ $ virtualenv django_env
+    ~ $ cd django_env/
+    ~/django_env $ source bin/activate
+    (django_env)~/django_env $ pip install django
+    (django_env)~/django_env $ mkdir src
+    (django_env)~/django_env $ cd src
+    (django_env)~/django_env/src $ django-admin startproject timing-attack
+    (django_env)~/django_env/src $ cd timingattack/timingattack/
+    (django_env)~/django_env/src/timingattack/timingattack $ touch tests.py # <<<-- put this content there ;)
+    (django_env)~/django_env/src/timingattack/timingattack $ cd ..
+    (django_env)~/django_env/src/timingattack $ ./manage.py test
+    Creating test database for alias 'default'...
+    
     Measuring successful django login (200 loops)...
     	Min/max avg with 30 items.
-    	avg.min: 46.2ms (-6%) - average: 49.4ms - avg.max: 54.8ms (9%) (takes 10.24 sec.)
+    	avg.min: 45.7ms (-6%) - average: 48.8ms - avg.max: 54.5ms (10%) (takes 10.11 sec.)
     Measuring 'wrong password' django login (200 loops)...
     	Min/max avg with 30 items.
-    	avg.min: 49.3ms (-4%) - average: 51.7ms - avg.max: 56.6ms (8%) (takes 10.43 sec.)
+    	avg.min: 49.0ms (-6%) - average: 52.1ms - avg.max: 57.0ms (8%) (takes 10.52 sec.)
     Measuring 'wrong username' django login (200 loops)...
     	Min/max avg with 30 items.
-    	avg.min: 49.3ms (-6%) - average: 52.5ms - avg.max: 58.1ms (9%) (takes 10.59 sec.)
-     *** max.average django diff: 3.08ms (5.9%)
+    	avg.min: 48.5ms (-6%) - average: 51.6ms - avg.max: 58.0ms (11%) (takes 10.42 sec.)
+     *** max.average django diff: 3.33ms (6.4%)
+    .
+    ----------------------------------------------------------------------
+    Ran 1 test in 31.100s
 
 
     :copyleft: 2015 by the secure-js-login team, see AUTHORS for more details.
