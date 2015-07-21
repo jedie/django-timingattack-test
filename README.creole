@@ -11,8 +11,9 @@ main code is in:
 * [[https://github.com/jedie/django-timingattack-test/blob/master/timingattack/tests.py|/timingattack/tests.py]]
 
 
-HowTo, e.g:
+=== HowTo
 
+e.g:
 {{{
 ~ $ virtualenv django_env
 ~ $ cd django_env/
@@ -42,3 +43,23 @@ Destroying test database for alias 'default'...
 
 (django_env)~/django_env/src/django-timingattack-test $ gnome-open DjangoTimingAttackMatplot.pdf
 }}}
+
+=== results
+
+The generated **DjangoTimingAttackMatplot.pdf** contains a matplot like this:
+
+----
+
+{{https://raw.githubusercontent.com/jedie/django-timingattack-test/master/results_default_hasher.jpg|/results_default_hasher.jpg}}
+
+With the default password hasher.
+
+----
+
+{{https://raw.githubusercontent.com/jedie/django-timingattack-test/master/results_MD5_hasher.jpg|/results_default_hasher.jpg}}
+
+With the MD5 password hasher.
+
+used: {{{@override_settings(PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher',))}}}
+
+----
