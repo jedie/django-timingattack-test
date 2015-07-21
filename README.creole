@@ -1,0 +1,8 @@
+
+
+WIP: measure timingattacks against django login
+
+
+main code is in:
+
+* [[https://github.com/jedie/django-timingattack-test/blob/master/timingattack/tests.py|/timingattack/tests.py]]
