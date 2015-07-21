@@ -4,26 +4,6 @@
     Timing Attack DEMO
     ~~~~~~~~~~~~~~~~~~
 
-    HowTo:
-
-    ~ $ virtualenv django_env
-    ~ $ cd django_env/
-    ~/django_env $ source bin/activate
-    (django_env)~/django_env $ pip install --upgrade pip
-    (django_env)~/django_env $ pip install django matplotlib
-    (django_env)~/django_env $ mkdir src
-    (django_env)~/django_env $ cd src
-    (django_env)~/django_env/src $ django-admin startproject timingattack
-    (django_env)~/django_env/src $ cd timingattack/timingattack/
-    (django_env)~/django_env/src/timingattack/timingattack $ touch tests.py # <<<-- put this content there ;)
-    (django_env)~/django_env/src/timingattack/timingattack $ cd ..
-    (django_env)~/django_env/src/timingattack $ ./manage.py test
-    Creating test database for alias 'default'...
-    .
-    ----------------------------------------------------------------------
-    Ran 1 test in 31.100s
-
-
     :copyleft: 2015 by the secure-js-login team, see AUTHORS for more details.
     :created: by JensDiemer.de
     :license: GNU GPL v3 or above, see LICENSE for more details

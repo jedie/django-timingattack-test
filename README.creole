@@ -1,8 +1,44 @@
 
+WIP: measure Django Timing-Attack against login.
 
-WIP: measure timingattacks against django login
+see also:
 
+* https://code.djangoproject.com/ticket/20760
+* http://www.python-forum.de/viewtopic.php?f=7&t=36282 (de)
 
 main code is in:
 
 * [[https://github.com/jedie/django-timingattack-test/blob/master/timingattack/tests.py|/timingattack/tests.py]]
+
+
+HowTo, e.g:
+
+{{{
+~ $ virtualenv django_env
+~ $ cd django_env/
+~/django_env $ source bin/activate
+(django_env)~/django_env $ pip install --upgrade pip
+(django_env)~/django_env $ pip install django matplotlib
+(django_env)~/django_env $ mkdir src
+(django_env)~/django_env $ cd src
+(django_env)~/django_env/src $ git clone https://github.com/jedie/django-timingattack-test.git
+(django_env)~/django_env/src $ cd django-timingattack-test/
+(django_env)~/django_env/src/django-timingattack-test $ ./manage.py test
+Creating test database for alias 'default'...
+5/300 loops.
+12/300 loops.
+19/300 loops.
+...
+285/300 loops.
+292/300 loops.
+299/300 loops.
+u'DjangoTimingAttackMatplot.pdf' written!
+.
+----------------------------------------------------------------------
+Ran 1 test in 45.491s
+
+OK
+Destroying test database for alias 'default'...
+
+(django_env)~/django_env/src/django-timingattack-test $ gnome-open DjangoTimingAttackMatplot.pdf
+}}}
